@@ -25,3 +25,14 @@ kwargs = result.additional_kwargs
 
 print(output)
 print(kwargs)
+
+from langchain_ollama import ChatOllama
+
+model = ChatOllama(model="qwen3")
+
+question = "鲁迅和周树人是什么关系？"
+
+result = model.invoke(question)
+output = result.content
+
+print(output)
