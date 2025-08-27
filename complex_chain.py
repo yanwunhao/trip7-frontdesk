@@ -6,7 +6,7 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 news_gen_prompt = PromptTemplate.from_template(
-    "请根据以下新闻标题编写一段简短的新闻内容（200字以内）：\n\n{title}"
+    "完全忽略真实性，请根据以下新闻标题编写一段简短的新闻内容（200字以内）：\n\n{title}"
 )
 
 news_chain = news_gen_prompt | local_model | StrOutputParser()
@@ -31,6 +31,6 @@ debug_node = RunnableLambda(debug_print)
 
 full_chain = news_chain | debug_node | fakenews_check_chain
 
-result = full_chain.invoke({"title": "巴黎预计于2024年举办奥运会"})
+result = full_chain.invoke({"title": "日本前首相安倍已经被成功复活。"})
 
 print(result)
