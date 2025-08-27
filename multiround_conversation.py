@@ -21,8 +21,14 @@ question = "你叫什么名字?"
 
 message_list.append(HumanMessage(content=question))
 
-print(message_list)
-
 result = basic_qa_chain.invoke({"messages": message_list})
 
 print(result)
+
+import asyncio
+
+async def stream_response():
+    async for chunk in basic_qa_chain.astream({"messages": message_list}):
+        print(chunk, end="", flush=True)
+
+asyncio.run(stream_response())
