@@ -1,8 +1,12 @@
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from client import generate_response
 
 app = FastAPI(title="trip7-hotel-frontdesk-service")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
@@ -18,6 +22,11 @@ async def invoke_frontdesk_service(request: Request):
     response = generate_response(conversation_history=conversation_history)
 
     return {"message": response}
+
+
+@app.get("/test")
+async def test_chatbot():
+    return FileResponse("static/testpage.html")
 
 
 if __name__ == "__main__":
