@@ -1,8 +1,24 @@
+import os
 from langchain_core.messages import AIMessage, HumanMessage
 
 from model import create_frontdesk_chain
 
-frontdesk_chain = create_frontdesk_chain()
+
+def load_hotel_introduction(file_path="hotel_introd.txt"):
+    current_dir = os.path.dirname(__file__)
+    full_path = os.path.join(current_dir, file_path)
+
+    with open(full_path, "r", encoding="utf-8") as f:
+        content = f.read().strip()
+
+    return content
+
+
+frontdesk_chain = create_frontdesk_chain(
+    bot_name="李小鹤",
+    hotel_name="Trip7箱根仙石原温泉ホテル",
+    hotel_description=load_hotel_introduction(),
+)
 
 
 def create_message_list(conversation_history):
