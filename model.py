@@ -23,7 +23,7 @@ def load_system_prompt_template(file_path="system_prompt.md"):
 
 
 def create_frontdesk_chain(bot_name, hotel_name, hotel_description):
-    local_model = ChatOllama(model="qwen3:latest", reasoning=False)
+    local_model = ChatOllama(model="qwen3:32b", reasoning=False)
 
     # 从文件加载系统提示模板并格式化
     system_template = load_system_prompt_template()

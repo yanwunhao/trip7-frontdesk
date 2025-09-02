@@ -15,7 +15,7 @@ def load_hotel_introduction(file_path="hotel_introd.txt"):
 
 
 frontdesk_chain = create_frontdesk_chain(
-    bot_name="李小鹤",
+    bot_name="郑小飞",
     hotel_name="Trip7箱根仙石原温泉ホテル",
     hotel_description=load_hotel_introduction(),
 )
