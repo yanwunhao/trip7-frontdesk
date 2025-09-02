@@ -41,7 +41,7 @@ test_data = {
 }
 
 # API endpoint
-url = "http://localhost:8000/invoke"
+url = "http://160.16.67.238:10021/invoke"
 
 try:
     # Send POST request
