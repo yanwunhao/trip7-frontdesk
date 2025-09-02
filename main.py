@@ -12,6 +12,8 @@ app.add_middleware(
     allow_origins=[
         "http://yuzawamd.com",
         "https://yuzawamd.com",
+        "http://192.168.100.147:8000",
+        "https://192.168.100.147:8000",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "https://localhost:8000",
