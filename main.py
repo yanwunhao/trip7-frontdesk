@@ -6,6 +6,8 @@ from util import load_hotel_introduction
 from client import generate_response
 from model import create_frontdesk_chain
 
+from dsproxy import deepseek_response_proxy
+
 app = FastAPI(title="trip7-hotel-frontdesk-service")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -24,6 +26,17 @@ async def root():
     return {"message": "Hello World"}
 
 
+@app.post("/dsproxy")
+async def deepseek_proxy(request: Request):
+    json_data = await request.json()
+
+    conversation_history = json_data["data"]["conversation_history"]
+
+    response = deepseek_response_proxy(conversation_history)
+
+    return {"message": response}
+
+
 @app.post("/invoke")
 async def invoke_frontdesk_service(request: Request):
     json_data = await request.json()
@@ -36,9 +49,14 @@ async def invoke_frontdesk_service(request: Request):
     return {"message": response}
 
 
-@app.get("/test")
+@app.get("/testfrontdesk")
 async def test_chatbot():
-    return FileResponse("static/testpage.html")
+    return FileResponse("static/testfrontdesk.html")
+
+
+@app.get("/testdsproxy")
+async def test_dsproxy():
+    return FileResponse("static/testdsproxy.html")
 
 
 if __name__ == "__main__":
