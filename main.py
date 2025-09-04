@@ -13,11 +13,11 @@ app.add_middleware(
         "http://yuzawamd.com",
         "https://yuzawamd.com",
         "http://192.168.100.147:8000",
-        "https://192.168.100.147:8000",
+        "https://192.168.100.147:8443",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
-        "https://localhost:8000",
-        "https://127.0.0.1:8000",
+        "https://localhost:8443",
+        "https://127.0.0.1:8443",
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -49,5 +49,23 @@ async def test_chatbot():
 
 if __name__ == "__main__":
     import uvicorn
+    import os
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # HTTPS configuration
+    ssl_keyfile = os.getenv("SSL_KEYFILE", "key.pem")
+    ssl_certfile = os.getenv("SSL_CERTFILE", "cert.pem")
+    use_ssl = os.path.exists(ssl_keyfile) and os.path.exists(ssl_certfile)
+
+    if use_ssl:
+        print(f"Starting server with HTTPS on port 8443")
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=8443,
+            ssl_keyfile=ssl_keyfile,
+            ssl_certfile=ssl_certfile,
+        )
+    else:
+        print(f"SSL certificates not found. Starting HTTP server on port 8000")
+        print(f"To enable HTTPS, place cert.pem and key.pem in the project directory")
+        uvicorn.run(app, host="0.0.0.0", port=8000)
