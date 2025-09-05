@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
@@ -28,13 +28,21 @@ async def root():
 
 @app.post("/dsproxy")
 async def deepseek_proxy(request: Request):
-    json_data = await request.json()
-
-    conversation_history = json_data["data"]["conversation_history"]
-
-    response = deepseek_response_proxy(conversation_history)
-
-    return {"message": response}
+    try:
+        json_data = await request.json()
+        
+        if "data" not in json_data or "conversation_history" not in json_data["data"]:
+            raise HTTPException(status_code=400, detail="Invalid request format")
+            
+        conversation_history = json_data["data"]["conversation_history"]
+        
+        response = await deepseek_response_proxy(conversation_history, timeout=30)
+        
+        return {"message": response}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/invoke")
