@@ -1,6 +1,6 @@
 import os
 from langchain_ollama import ChatOllama
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_core.prompts import (
     ChatPromptTemplate,
     MessagesPlaceholder,
@@ -42,3 +42,21 @@ def create_frontdesk_chain(
     frontdesk_chain = chat_prompt | local_model | StrOutputParser()
 
     return frontdesk_chain
+
+
+def create_booking_confirmation_chain(model_name, system_prompt_filepath):
+    local_model = ChatOllama(model=model_name, reasoning=True)
+
+    system_template = load_system_prompt_template(system_prompt_filepath)
+    system_content = system_template.format()
+
+    return local_model, system_content
+
+
+def create_json_extraction_chain(model_name, system_prompt_filepath):
+    local_model = ChatOllama(model=model_name, reasoning=True)
+
+    system_template = load_system_prompt_template(system_prompt_filepath)
+    system_content = system_template.format()
+
+    return local_model, system_content
