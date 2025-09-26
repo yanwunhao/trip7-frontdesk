@@ -25,8 +25,16 @@ def load_system_prompt():
         return f.read()
 
 
-def create_message_list_with_system_prompt(system_prompt, conversation_history):
+def create_message_list_with_system_prompt(system_prompt, conversation_history, lang="jp"):
     message_list = [SystemMessage(content=system_prompt)]
+
+    lang_instructions = {
+        "cn": "[REPLY IN CHINESE] ",
+        "jp": "[REPLY IN JAPANESE] ",
+        "en": "[REPLY IN ENGLISH] "
+    }
+
+    lang_prefix = lang_instructions.get(lang, "[REPLY IN JAPANESE] ")
 
     for conversation in conversation_history:
         role = conversation["role"]
@@ -37,6 +45,13 @@ def create_message_list_with_system_prompt(system_prompt, conversation_history):
             message_list.append(AIMessage(content=content))
         else:
             pass
+
+    if message_list and len(message_list) > 1:
+        last_message = message_list[-1]
+        if hasattr(last_message, 'content') and last_message.__class__.__name__ == "HumanMessage":
+            last_message.content = lang_prefix + last_message.content
+        else:
+            message_list.append(HumanMessage(content=lang_prefix))
 
     return message_list
 
@@ -53,7 +68,7 @@ def get_deepseek_chain():
     return _deepseek_chain
 
 
-async def deepseek_response_proxy(conversation_history, timeout: int = 30):
+async def deepseek_response_proxy(conversation_history, lang="jp", timeout: int = 30):
     start_time = time.time()
     request_id = f"{int(start_time * 1000) % 100000}"
 
@@ -70,7 +85,7 @@ async def deepseek_response_proxy(conversation_history, timeout: int = 30):
             deepseek_chain = get_deepseek_chain()
 
             message_list = create_message_list_with_system_prompt(
-                system_prompt, conversation_history
+                system_prompt, conversation_history, lang
             )
 
             response = await asyncio.wait_for(
@@ -96,12 +111,12 @@ async def deepseek_response_proxy(conversation_history, timeout: int = 30):
             raise Exception(error_msg)
 
 
-def deepseek_response_proxy_sync(conversation_history):
+def deepseek_response_proxy_sync(conversation_history, lang="jp"):
     system_prompt = load_system_prompt()
     deepseek_chain = get_deepseek_chain()
 
     message_list = create_message_list_with_system_prompt(
-        system_prompt, conversation_history
+        system_prompt, conversation_history, lang
     )
 
     try:
