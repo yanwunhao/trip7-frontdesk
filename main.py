@@ -40,7 +40,12 @@ async def invoke_frontdesk_service(request: Request):
     json_data = await request.json()
 
     conversation_history = json_data["data"]["conversation_history"]
-    response = generate_response(conversation_history=conversation_history)
+    lang = json_data["data"].get("lang", "jp")
+
+    if lang not in ["cn", "jp", "en"]:
+        lang = "jp"
+
+    response = generate_response(conversation_history=conversation_history, lang=lang)
 
     return {"message": response}
 

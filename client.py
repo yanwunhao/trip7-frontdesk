@@ -48,8 +48,16 @@ def create_message_list(conversation_history):
     return message_list
 
 
-def generate_response(conversation_history):
+def generate_response(conversation_history, lang="jp"):
     message_list = create_message_list(conversation_history)
+
+    lang_instructions = {
+        "cn": "[REPLY IN CHINESE] ",
+        "jp": "[REPLY IN JAPANESE] ",
+        "en": "[REPLY IN ENGLISH] "
+    }
+
+    lang_prefix = lang_instructions.get(lang, "[REPLY IN JAPANESE] ")
 
     if (
         len(conversation_history) >= 2
@@ -76,6 +84,13 @@ def generate_response(conversation_history):
             message_list.append(
                 SystemMessage(content="User confirmation failed, not saved to database")
             )
+
+    if message_list and hasattr(message_list[-1], 'content'):
+        if message_list[-1].__class__.__name__ == "HumanMessage":
+            message_list[-1].content = lang_prefix + message_list[-1].content
+        else:
+            from langchain_core.messages import HumanMessage
+            message_list.append(HumanMessage(content=lang_prefix))
 
     response = frontdesk_chain.invoke({"messages": message_list})
 

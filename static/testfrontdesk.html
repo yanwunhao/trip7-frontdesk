@@ -91,11 +91,35 @@
         .clear-button:hover {
             background-color: #545b62;
         }
+        .language-selector {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .language-selector label {
+            font-weight: bold;
+            color: #333;
+        }
+        .language-selector select {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🏨 Trip7汤沢温泉酒店 - 前台聊天机器人测试</h1>
+        <div class="language-selector">
+            <label for="languageSelect">选择语言:</label>
+            <select id="languageSelect">
+                <option value="jp" selected>日本語</option>
+                <option value="cn">中文</option>
+                <option value="en">English</option>
+            </select>
+        </div>
         <button class="clear-button" onclick="clearChat()">清空对话</button>
         <div id="chatContainer" class="chat-container"></div>
         <div class="input-container">
@@ -150,6 +174,9 @@
             showLoading();
 
             try {
+                const languageSelect = document.getElementById('languageSelect');
+                const selectedLang = languageSelect.value;
+
                 const response = await fetch('/invoke', {
                     method: 'POST',
                     headers: {
@@ -157,7 +184,8 @@
                     },
                     body: JSON.stringify({
                         data: {
-                            conversation_history: conversationHistory
+                            conversation_history: conversationHistory,
+                            lang: selectedLang
                         }
                     })
                 });
