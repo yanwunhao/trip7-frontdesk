@@ -1,12 +1,12 @@
 import os
 from langchain_ollama import ChatOllama
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_core.prompts import (
     ChatPromptTemplate,
     MessagesPlaceholder,
     PromptTemplate,
 )
 from langchain_core.messages import SystemMessage
+from tools.database_tools import create_hotel_booking
 
 
 def load_system_prompt_template(file_path):
@@ -27,6 +27,9 @@ def create_frontdesk_chain(
 ):
     local_model = ChatOllama(model=model_name, reasoning=False)
 
+    # Bind the booking tool to the model for functional calling
+    local_model_with_tools = local_model.bind_tools([create_hotel_booking])
+
     system_template = load_system_prompt_template(system_prompt_filepath)
     system_content = system_template.format(
         bot_name=bot_name, hotel_name=hotel_name, hotel_description=hotel_description
@@ -39,24 +42,6 @@ def create_frontdesk_chain(
         ]
     )
 
-    frontdesk_chain = chat_prompt | local_model | StrOutputParser()
+    frontdesk_chain = chat_prompt | local_model_with_tools
 
     return frontdesk_chain
-
-
-def create_booking_confirmation_chain(model_name, system_prompt_filepath):
-    local_model = ChatOllama(model=model_name, reasoning=True)
-
-    system_template = load_system_prompt_template(system_prompt_filepath)
-    system_content = system_template.format()
-
-    return local_model, system_content
-
-
-def create_json_extraction_chain(model_name, system_prompt_filepath):
-    local_model = ChatOllama(model=model_name, reasoning=True)
-
-    system_template = load_system_prompt_template(system_prompt_filepath)
-    system_content = system_template.format()
-
-    return local_model, system_content

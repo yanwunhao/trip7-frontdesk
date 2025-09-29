@@ -51,7 +51,15 @@ async def invoke_frontdesk_service(request: Request):
 
     response = generate_response(conversation_history=conversation_history, lang=lang)
 
-    return {"message": response}
+    # Extract content from response object
+    if hasattr(response, 'content'):
+        response_content = response.content
+    elif isinstance(response, str):
+        response_content = response
+    else:
+        response_content = str(response)
+
+    return {"message": response_content}
 
 
 @app.get("/testfrontdesk")

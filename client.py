@@ -1,13 +1,9 @@
 import os
 from dotenv import load_dotenv
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-from model import (
-    create_frontdesk_chain,
-    create_booking_confirmation_chain,
-    create_json_extraction_chain,
-)
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from model import create_frontdesk_chain
 from util import load_hotel_introduction
-from tools.hotel_api import write_booking_to_database
+from tools.database_tools import create_hotel_booking
 
 load_dotenv()
 
@@ -19,17 +15,6 @@ frontdesk_chain = create_frontdesk_chain(
     hotel_description=load_hotel_introduction("./documents/hotel_introd.txt"),
 )
 
-booking_confirmation_model, booking_confirmation_prompt = (
-    create_booking_confirmation_chain(
-        model_name=os.getenv("VD_MODEL_NAME"),
-        system_prompt_filepath="./prompts/user_confirmation_check_prompt.md",
-    )
-)
-
-json_extraction_model, json_extraction_prompt = create_json_extraction_chain(
-    model_name=os.getenv("JSON_EXTRACTION_NAME"),
-    system_prompt_filepath="./prompts/booking_json_extraction_prompt.md",
-)
 
 
 def create_message_list(conversation_history):
@@ -59,32 +44,6 @@ def generate_response(conversation_history, lang="jp"):
 
     lang_prefix = lang_instructions.get(lang, "[REPLY IN JAPANESE] ")
 
-    if (
-        len(conversation_history) >= 2
-        and "=== 房间预订信息确认 ===" in conversation_history[-2]["content"]
-    ):
-        confirmation_result = booking_confirmation_model.invoke(
-            [
-                {"role": "system", "content": booking_confirmation_prompt},
-                {"role": "user", "content": str(message_list)},
-            ]
-        )
-        if confirmation_result.content.strip() == "YES":
-            json_result = json_extraction_model.invoke(
-                [
-                    {"role": "system", "content": json_extraction_prompt},
-                    {"role": "user", "content": conversation_history[-2]["content"]},
-                ]
-            )
-            db_result = write_booking_to_database(json_result.content)
-            message_list.append(
-                SystemMessage(content=f"Booking database result: {db_result}")
-            )
-        else:
-            message_list.append(
-                SystemMessage(content="User confirmation failed, not saved to database")
-            )
-
     if message_list and hasattr(message_list[-1], 'content'):
         if message_list[-1].__class__.__name__ == "HumanMessage":
             message_list[-1].content = lang_prefix + message_list[-1].content
@@ -93,6 +52,23 @@ def generate_response(conversation_history, lang="jp"):
             message_list.append(HumanMessage(content=lang_prefix))
 
     response = frontdesk_chain.invoke({"messages": message_list})
+
+    # Handle tool calls if the response contains them
+    if hasattr(response, 'tool_calls') and response.tool_calls:
+        # Execute tool calls
+        message_list.append(response)
+
+        for tool_call in response.tool_calls:
+            if tool_call['name'] == 'create_hotel_booking':
+                tool_result = create_hotel_booking.invoke(tool_call['args'])
+                message_list.append(ToolMessage(
+                    content=tool_result,
+                    tool_call_id=tool_call['id']
+                ))
+
+        # Get final response after tool execution
+        final_response = frontdesk_chain.invoke({"messages": message_list})
+        return final_response
 
     return response
 

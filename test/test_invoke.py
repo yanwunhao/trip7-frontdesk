@@ -1,89 +1,58 @@
 #!/usr/bin/env python3
 import requests
-import json
-import uuid
-from datetime import datetime
 
-# Base conversation history for all tests
-base_conversation = [
+# Test booking conversation that should trigger function call
+booking_conversation = [
     {
         "role": "user",
-        "content": "你好，我想预约一下你们家酒店，两个人，后天下午入住，待三天。",
-        "timestamp": "2025-08-28T10:00:00Z",
+        "content": "我想预订房间",
+        "timestamp": "2025-09-29T10:00:00Z",
     },
     {
         "role": "assistant",
-        "content": "您好，欢迎来到Trip7箱根仙石原温泉ホテル！很高兴为您服务。您提到要预约两人入住，后天下午入住，待三天。请问您的联系人姓名是？",
-        "timestamp": "2025-08-28T10:00:05Z",
+        "content": "好的，请问您需要几间房间，入住日期和退房日期是？",
+        "timestamp": "2025-09-29T10:00:05Z",
     },
     {
         "role": "user",
-        "content": "董冕雄。",
-        "timestamp": "2025-08-28T10:01:00Z",
+        "content": "我叫董冕雄，邮箱是mx.dong@csse.muroran-it.ac.jp，电话13800138000，需要1间房，2025-10-01入住，2025-10-03退房，2个成人",
+        "timestamp": "2025-09-29T10:01:00Z",
     },
 ]
 
-# Test cases for different languages
-test_cases = [
-    {
-        "name": "Chinese Test",
-        "lang": "cn",
-        "data": {"conversation_history": base_conversation, "lang": "cn"},
-    },
-    {
-        "name": "Japanese Test (default)",
-        "lang": "jp",
-        "data": {"conversation_history": base_conversation, "lang": "jp"},
-    },
-    {
-        "name": "English Test",
-        "lang": "en",
-        "data": {"conversation_history": base_conversation, "lang": "en"},
-    },
-    {
-        "name": "Invalid Language Test (should default to Japanese)",
-        "lang": "fr",
-        "data": {"conversation_history": base_conversation, "lang": "fr"},
-    },
-    {
-        "name": "No Language Parameter Test (should default to Japanese)",
-        "lang": None,
-        "data": {"conversation_history": base_conversation},
-    },
-]
-
-# API endpoint
 url = "http://localhost:8000/invoke"
 
-
-def test_language_support():
-    print("Testing language support for /invoke endpoint")
+def test_functional_calling():
+    print("Testing functional calling for booking system")
     print("=" * 50)
 
-    for i, test_case in enumerate(test_cases, 1):
-        print(f"\nTest {i}: {test_case['name']}")
-        print(f"Language parameter: {test_case['lang']}")
-        print("-" * 30)
+    try:
+        response = requests.post(url, json={"data": {"conversation_history": booking_conversation}})
 
-        try:
-            response = requests.post(url, json={"data": test_case["data"]})
+        print(f"Status Code: {response.status_code}")
+        if response.status_code == 200:
+            result = response.json()
+            print(f"Response: {result['message']}")
 
-            print(f"Status Code: {response.status_code}")
-            if response.status_code == 200:
-                result = response.json()
-                print(f"Response: {result['message'][:100]}...")
+            # Check if function call was triggered
+            response_text = result['message'].lower()
+            if any(indicator in response_text for indicator in [
+                "booking successful", "order reference", "预订成功", "订单号"
+            ]):
+                print("✅ FUNCTION CALL TRIGGERED - Booking processed")
+            elif any(indicator in response_text for indicator in [
+                "booking failed", "api request failed", "预订失败"
+            ]):
+                print("⚠️  FUNCTION CALL TRIGGERED - But booking failed")
             else:
-                print(f"Error Response: {response.text}")
+                print("❌ NO FUNCTION CALL - Response unclear")
+        else:
+            print(f"❌ Error: {response.text}")
 
-        except requests.exceptions.ConnectionError:
-            print(
-                "Error: Could not connect to the server. Make sure the FastAPI server is running."
-            )
-        except Exception as e:
-            print(f"Error: {e}")
-
-        print()
-
+    except requests.exceptions.ConnectionError:
+        print("❌ Error: Server not running")
+    except Exception as e:
+        print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
-    test_language_support()
+    test_functional_calling()
