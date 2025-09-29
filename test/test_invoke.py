@@ -53,7 +53,7 @@ test_cases = [
 ]
 
 # API endpoint
-url = "http://160.16.67.238:3000/invoke"
+url = "http://localhost:8000/invoke"
 
 
 def test_language_support():
