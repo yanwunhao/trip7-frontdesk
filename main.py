@@ -26,8 +26,7 @@ async def deepseek_proxy(request: Request):
 
         conversation_history = json_data["data"]["conversation_history"]
 
-        job_data = json_data["data"]["job_positions"]
-        print(job_data)
+        job_data = json_data["data"].get("job_positions")
 
         lang = json_data["data"].get("lang", "jp")
 
@@ -35,7 +34,7 @@ async def deepseek_proxy(request: Request):
             lang = "jp"
 
         response = await deepseek_response_proxy(
-            conversation_history, lang=lang, timeout=30
+            conversation_history, lang=lang, timeout=30, jobinfo=job_data
         )
 
         return {"message": response}
