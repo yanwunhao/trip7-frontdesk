@@ -30,7 +30,9 @@ async def deepseek_proxy(request: Request):
         if lang not in ["cn", "jp", "en"]:
             lang = "jp"
 
-        response = await deepseek_response_proxy(conversation_history, lang=lang, timeout=30)
+        response = await deepseek_response_proxy(
+            conversation_history, lang=lang, timeout=30
+        )
 
         return {"message": response}
     except HTTPException:
@@ -44,6 +46,10 @@ async def invoke_frontdesk_service(request: Request):
     json_data = await request.json()
 
     conversation_history = json_data["data"]["conversation_history"]
+    job_data = json_data["data"]["job_positions"]
+
+    print(job_data)
+
     lang = json_data["data"].get("lang", "jp")
 
     if lang not in ["cn", "jp", "en"]:
@@ -52,7 +58,7 @@ async def invoke_frontdesk_service(request: Request):
     response = generate_response(conversation_history=conversation_history, lang=lang)
 
     # Extract content from response object
-    if hasattr(response, 'content'):
+    if hasattr(response, "content"):
         response_content = response.content
     elif isinstance(response, str):
         response_content = response
@@ -65,11 +71,6 @@ async def invoke_frontdesk_service(request: Request):
 @app.get("/testfrontdesk")
 async def test_chatbot():
     return FileResponse("static/testfrontdesk.html")
-
-
-@app.get("/testdsproxy")
-async def test_dsproxy():
-    return FileResponse("static/testdsproxy.html")
 
 
 if __name__ == "__main__":
