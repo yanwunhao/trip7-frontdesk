@@ -25,6 +25,10 @@ async def deepseek_proxy(request: Request):
             raise HTTPException(status_code=400, detail="Invalid request format")
 
         conversation_history = json_data["data"]["conversation_history"]
+
+        job_data = json_data["data"]["job_positions"]
+        print(job_data)
+
         lang = json_data["data"].get("lang", "jp")
 
         if lang not in ["cn", "jp", "en"]:
@@ -46,9 +50,6 @@ async def invoke_frontdesk_service(request: Request):
     json_data = await request.json()
 
     conversation_history = json_data["data"]["conversation_history"]
-    job_data = json_data["data"]["job_positions"]
-
-    print(job_data)
 
     lang = json_data["data"].get("lang", "jp")
 
