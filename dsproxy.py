@@ -27,7 +27,9 @@ def load_system_prompt():
         return f.read()
 
 
-def create_message_list_with_system_prompt(system_prompt, conversation_history, lang="jp", jobinfo=None):
+def create_message_list_with_system_prompt(
+    system_prompt, conversation_history, lang="jp", jobinfo=None
+):
     message_list = [SystemMessage(content=system_prompt)]
 
     # Add job information as system message if provided
@@ -38,7 +40,7 @@ def create_message_list_with_system_prompt(system_prompt, conversation_history, 
     lang_instructions = {
         "cn": "[REPLY IN CHINESE] ",
         "jp": "[REPLY IN JAPANESE] ",
-        "en": "[REPLY IN ENGLISH] "
+        "en": "[REPLY IN ENGLISH] ",
     }
 
     lang_prefix = lang_instructions.get(lang, "[REPLY IN JAPANESE] ")
@@ -55,7 +57,10 @@ def create_message_list_with_system_prompt(system_prompt, conversation_history, 
 
     if message_list and len(message_list) > 1:
         last_message = message_list[-1]
-        if hasattr(last_message, 'content') and last_message.__class__.__name__ == "HumanMessage":
+        if (
+            hasattr(last_message, "content")
+            and last_message.__class__.__name__ == "HumanMessage"
+        ):
             last_message.content = lang_prefix + last_message.content
         else:
             message_list.append(HumanMessage(content=lang_prefix))
@@ -75,7 +80,9 @@ def get_deepseek_chain():
     return _deepseek_chain
 
 
-async def deepseek_response_proxy(conversation_history, lang="jp", timeout: int = 30, jobinfo=None):
+async def deepseek_response_proxy(
+    conversation_history, lang="jp", timeout: int = 30, jobinfo=None
+):
     start_time = time.time()
     request_id = f"{int(start_time * 1000) % 100000}"
 
