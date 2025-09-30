@@ -9,7 +9,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 
-from util import jobinfo2markdown
+from util import additionalinfo2markdown
 
 load_dotenv(override=True)
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
@@ -22,20 +22,21 @@ _deepseek_chain = None
 _semaphore = asyncio.Semaphore(5)
 
 
-def load_system_prompt():
-    with open("prompts/deepseek_system_prompt.md", "r", encoding="utf-8") as f:
+def load_system_prompt(company):
+    prompt_file = f"prompts/{company}_system_prompt.md"
+    with open(prompt_file, "r", encoding="utf-8") as f:
         return f.read()
 
 
 def create_message_list_with_system_prompt(
-    system_prompt, conversation_history, lang="jp", jobinfo=None
+    system_prompt, conversation_history, lang="jp", additional_info=None
 ):
     message_list = [SystemMessage(content=system_prompt)]
 
-    # Add job information as system message if provided
-    if jobinfo:
-        job_markdown = jobinfo2markdown(jobinfo)
-        message_list.append(SystemMessage(content=job_markdown))
+    # Add additional information as system message if provided
+    if additional_info:
+        info_markdown = additionalinfo2markdown(additional_info)
+        message_list.append(SystemMessage(content=info_markdown))
 
     lang_instructions = {
         "cn": "[REPLY IN CHINESE] ",
@@ -81,7 +82,11 @@ def get_deepseek_chain():
 
 
 async def deepseek_response_proxy(
-    conversation_history, lang="jp", timeout: int = 30, jobinfo=None
+    conversation_history,
+    lang="jp",
+    timeout: int = 30,
+    additional_info=None,
+    company=None,
 ):
     start_time = time.time()
     request_id = f"{int(start_time * 1000) % 100000}"
@@ -95,11 +100,11 @@ async def deepseek_response_proxy(
         )
 
         try:
-            system_prompt = load_system_prompt()
+            system_prompt = load_system_prompt(company)
             deepseek_chain = get_deepseek_chain()
 
             message_list = create_message_list_with_system_prompt(
-                system_prompt, conversation_history, lang, jobinfo
+                system_prompt, conversation_history, lang, additional_info
             )
 
             response = await asyncio.wait_for(
@@ -125,12 +130,14 @@ async def deepseek_response_proxy(
             raise Exception(error_msg)
 
 
-def deepseek_response_proxy_sync(conversation_history, lang="jp", jobinfo=None):
-    system_prompt = load_system_prompt()
+def deepseek_response_proxy_sync(
+    conversation_history, lang="jp", additional_info=None, company=None
+):
+    system_prompt = load_system_prompt(company)
     deepseek_chain = get_deepseek_chain()
 
     message_list = create_message_list_with_system_prompt(
-        system_prompt, conversation_history, lang, jobinfo
+        system_prompt, conversation_history, lang, additional_info
     )
 
     try:

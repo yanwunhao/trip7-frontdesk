@@ -1,10 +1,21 @@
+import os
+import logging
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from dotenv import load_dotenv
 
 from client import generate_response
 
 from dsproxy import deepseek_response_proxy
+
+load_dotenv(override=True)
+ALLOWED_COMPANIES = os.getenv("ALLOWED_COMPANIES", "").split(",")
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info(f"Loaded ALLOWED_COMPANIES: {ALLOWED_COMPANIES}")
 
 app = FastAPI(title="trip7-hotel-frontdesk-service")
 
@@ -26,7 +37,19 @@ async def deepseek_proxy(request: Request):
 
         conversation_history = json_data["data"]["conversation_history"]
 
-        job_data = json_data["data"].get("job_positions")
+        company = json_data["data"].get("company")
+
+        if not company:
+            raise HTTPException(status_code=500, detail="Company parameter is required")
+
+        if company not in ALLOWED_COMPANIES:
+            raise HTTPException(status_code=500, detail=f"Invalid company: {company}")
+
+        # Handle additional_info based on company
+        if company == "softusing":
+            additional_info = json_data["data"].get("job_positions")
+        else:
+            additional_info = None
 
         lang = json_data["data"].get("lang", "jp")
 
@@ -34,7 +57,11 @@ async def deepseek_proxy(request: Request):
             lang = "jp"
 
         response = await deepseek_response_proxy(
-            conversation_history, lang=lang, timeout=30, jobinfo=job_data
+            conversation_history,
+            lang=lang,
+            timeout=30,
+            additional_info=additional_info,
+            company=company,
         )
 
         return {"message": response}

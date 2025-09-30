@@ -11,37 +11,36 @@ def load_hotel_introduction(file_path="hotel_introd.txt"):
     return content
 
 
-def jobinfo2markdown(jobinfo: dict) -> str:
+def additionalinfo2markdown(data: dict) -> str:
     """
-    Convert job information JSON to Markdown format
+    Convert additional information dictionary to Markdown format
 
     Args:
-        jobinfo: Dictionary containing departments list with positions
+        data: Dictionary containing any structured data
 
     Returns:
         Formatted Markdown string
     """
-    markdown_lines = ["# 招聘職位一覧\n"]
+    def process_value(value, level=1):
+        lines = []
+        if isinstance(value, dict):
+            for key, val in value.items():
+                lines.append(f"{'#' * level} {key}\n")
+                lines.extend(process_value(val, level + 1))
+        elif isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict):
+                    lines.extend(process_value(item, level))
+                else:
+                    lines.append(f"- {item}\n")
+        else:
+            lines.append(f"{value}\n")
+        return lines
 
-    departments = jobinfo.get('departments', [])
-
-    for dept in departments:
-        dept_name = dept.get('name', '')
-        positions = dept.get('positions', [])
-
-        # Department heading
-        markdown_lines.append(f"## {dept_name}\n")
-
-        # Iterate through all positions in this department
-        for position in positions:
-            title = position.get('title', '')
-            salary = position.get('salary', '')
-            description = position.get('description', '')
-
-            # Position details
-            markdown_lines.append(f"### {title}\n")
-            markdown_lines.append(f"**給与範囲:** {salary}\n")
-            markdown_lines.append(f"**職務内容:** {description}\n")
-            markdown_lines.append("")  # Empty line separator
+    markdown_lines = []
+    for key, value in data.items():
+        markdown_lines.append(f"# {key}\n")
+        markdown_lines.extend(process_value(value, 2))
+        markdown_lines.append("")
 
     return "\n".join(markdown_lines)
