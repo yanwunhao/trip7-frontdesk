@@ -48,8 +48,16 @@ async def deepseek_proxy(request: Request):
         # Handle additional_info based on company
         if company == "softusing":
             additional_info = json_data["data"].get("job_positions")
+            additional_info_description = "以下は現在募集中の求人情報です。ユーザーのニーズに合わせて適切な求人をご提案ください："
+        elif company == "DXAI":
+            additional_info = json_data["data"].get("course_data")
+            additional_info_description = "以下はDXAI協会が提供するコースおよびサービス情報です。ユーザーのニーズに応じて関連する提案を行ってください："
+        elif company == "ITSchool":
+            additional_info = json_data["data"].get("course_data")
+            additional_info_description = "以下はITSCHOOLが提供するコースおよび研修情報です。ユーザーのニーズに応じて関連する提案を行ってください："
         else:
             additional_info = None
+            additional_info_description = None
 
         lang = json_data["data"].get("lang", "jp")
 
@@ -61,6 +69,7 @@ async def deepseek_proxy(request: Request):
             lang=lang,
             timeout=30,
             additional_info=additional_info,
+            additional_info_description=additional_info_description,
             company=company,
         )
 

@@ -29,12 +29,14 @@ def load_system_prompt(company):
 
 
 def create_message_list_with_system_prompt(
-    system_prompt, conversation_history, lang="jp", additional_info=None
+    system_prompt, conversation_history, lang="jp", additional_info=None, additional_info_description=None
 ):
     message_list = [SystemMessage(content=system_prompt)]
 
-    # Add additional information as system message if provided
+    # Add additional information description and data as system messages if provided
     if additional_info:
+        if additional_info_description:
+            message_list.append(SystemMessage(content=additional_info_description))
         info_markdown = additionalinfo2markdown(additional_info)
         message_list.append(SystemMessage(content=info_markdown))
 
@@ -86,6 +88,7 @@ async def deepseek_response_proxy(
     lang="jp",
     timeout: int = 30,
     additional_info=None,
+    additional_info_description=None,
     company=None,
 ):
     start_time = time.time()
@@ -104,7 +107,7 @@ async def deepseek_response_proxy(
             deepseek_chain = get_deepseek_chain()
 
             message_list = create_message_list_with_system_prompt(
-                system_prompt, conversation_history, lang, additional_info
+                system_prompt, conversation_history, lang, additional_info, additional_info_description
             )
 
             response = await asyncio.wait_for(
@@ -131,13 +134,13 @@ async def deepseek_response_proxy(
 
 
 def deepseek_response_proxy_sync(
-    conversation_history, lang="jp", additional_info=None, company=None
+    conversation_history, lang="jp", additional_info=None, additional_info_description=None, company=None
 ):
     system_prompt = load_system_prompt(company)
     deepseek_chain = get_deepseek_chain()
 
     message_list = create_message_list_with_system_prompt(
-        system_prompt, conversation_history, lang, additional_info
+        system_prompt, conversation_history, lang, additional_info, additional_info_description
     )
 
     try:
