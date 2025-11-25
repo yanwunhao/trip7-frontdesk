@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from model import create_frontdesk_chain
 from util import load_hotel_introduction
-from tools.database_tools import create_hotel_booking
+from tools.database_tools import create_hotel_booking, search_available_rooms, format_rooms_html
 
 load_dotenv()
 
@@ -53,22 +53,34 @@ def generate_response(conversation_history, lang="jp"):
 
     response = frontdesk_chain.invoke({"messages": message_list})
 
+    # Tool mapping
+    tools = {
+        'create_hotel_booking': create_hotel_booking,
+        'search_available_rooms': search_available_rooms,
+        'format_rooms_html': format_rooms_html,
+    }
+
     # Handle tool calls if the response contains them
-    if hasattr(response, 'tool_calls') and response.tool_calls:
-        # Execute tool calls
+    while hasattr(response, 'tool_calls') and response.tool_calls:
         message_list.append(response)
 
         for tool_call in response.tool_calls:
-            if tool_call['name'] == 'create_hotel_booking':
-                tool_result = create_hotel_booking.invoke(tool_call['args'])
+            tool_name = tool_call['name']
+            if tool_name in tools:
+                tool_result = tools[tool_name].invoke(tool_call['args'])
+
+                # 如果是搜索房间，自动调用格式化并直接返回HTML
+                if tool_name == 'search_available_rooms':
+                    html_result = format_rooms_html.invoke({"rooms_json": tool_result})
+                    return html_result
+
                 message_list.append(ToolMessage(
                     content=tool_result,
                     tool_call_id=tool_call['id']
                 ))
 
-        # Get final response after tool execution
-        final_response = frontdesk_chain.invoke({"messages": message_list})
-        return final_response
+        # Get next response after tool execution
+        response = frontdesk_chain.invoke({"messages": message_list})
 
     return response
 

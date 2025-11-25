@@ -6,7 +6,11 @@ from langchain_core.prompts import (
     PromptTemplate,
 )
 from langchain_core.messages import SystemMessage
-from tools.database_tools import create_hotel_booking
+from tools.database_tools import (
+    create_hotel_booking,
+    search_available_rooms,
+    format_rooms_html,
+)
 
 
 def load_system_prompt_template(file_path):
@@ -27,8 +31,12 @@ def create_frontdesk_chain(
 ):
     local_model = ChatOllama(model=model_name, reasoning=False)
 
-    # Bind the booking tool to the model for functional calling
-    local_model_with_tools = local_model.bind_tools([create_hotel_booking])
+    # Bind all tools to the model for functional calling
+    local_model_with_tools = local_model.bind_tools([
+        search_available_rooms,
+        format_rooms_html,
+        create_hotel_booking,
+    ])
 
     system_template = load_system_prompt_template(system_prompt_filepath)
     system_content = system_template.format(
