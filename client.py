@@ -51,6 +51,15 @@ def generate_response(conversation_history, lang="jp"):
             from langchain_core.messages import HumanMessage
             message_list.append(HumanMessage(content=lang_prefix))
 
+    # DEBUG: Print the full message list sent to LLM
+    print("\n" + "="*60)
+    print("DEBUG: Message list sent to LLM:")
+    for i, msg in enumerate(message_list):
+        msg_type = msg.__class__.__name__
+        content_preview = msg.content[:200] if len(msg.content) > 200 else msg.content
+        print(f"  [{i}] {msg_type}: {content_preview}")
+    print("="*60 + "\n")
+
     response = frontdesk_chain.invoke({"messages": message_list})
 
     # Tool mapping

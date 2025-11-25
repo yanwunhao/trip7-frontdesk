@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import (
     ChatPromptTemplate,
@@ -21,7 +23,7 @@ def load_system_prompt_template(file_path):
         content = f.read()
 
     return PromptTemplate(
-        input_variables=["bot_name", "hotel_name", "hotel_description"],
+        input_variables=["bot_name", "hotel_name", "hotel_description", "current_date"],
         template=content,
     )
 
@@ -39,8 +41,17 @@ def create_frontdesk_chain(
     ])
 
     system_template = load_system_prompt_template(system_prompt_filepath)
+
+    # Get current date in Japan timezone
+    japan_tz = ZoneInfo("Asia/Tokyo")
+    japan_now = datetime.now(japan_tz)
+    current_date = japan_now.strftime("%Y-%m-%d")
+
     system_content = system_template.format(
-        bot_name=bot_name, hotel_name=hotel_name, hotel_description=hotel_description
+        bot_name=bot_name,
+        hotel_name=hotel_name,
+        hotel_description=hotel_description,
+        current_date=current_date,
     )
 
     chat_prompt = ChatPromptTemplate.from_messages(
