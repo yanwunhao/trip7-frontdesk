@@ -55,6 +55,14 @@ def search_available_rooms(
         if response.status_code == 200:
             result = response.json()
             if result.get("success"):
+                # Add search parameters to result for format_rooms_html to use
+                result["search_params"] = {
+                    "checkin": checkin,
+                    "checkout": checkout,
+                    "adults": adults,
+                    "rooms": rooms,
+                    "children": children,
+                }
                 # Return the result as JSON string for the LLM to process
                 return json.dumps(result, ensure_ascii=False)
             else:
@@ -110,7 +118,7 @@ def format_rooms_html(
     Returns:
         HTML formatted string with room information, images, details and booking link
     """
-    logger.info(f"[TOOL] format_rooms_html called")
+    logger.info(f"[TOOL] format_rooms_html called with checkin={checkin}, checkout={checkout}, adults={adults}, rooms={rooms}, children={children}")
     try:
         # Parse the JSON data - handle both string and dict input
         if isinstance(rooms_json, str):
@@ -123,17 +131,26 @@ def format_rooms_html(
                 f"<p style='color: red;'>❌ {data.get('message', 'Search failed')}</p>"
             )
 
-        rooms = data.get("data", [])
+        # Extract search params from JSON if available (priority over function args)
+        search_params = data.get("search_params", {})
+        if search_params:
+            checkin = search_params.get("checkin", checkin)
+            checkout = search_params.get("checkout", checkout)
+            adults = search_params.get("adults", adults)
+            rooms = search_params.get("rooms", rooms)
+            children = search_params.get("children", children)
 
-        if not rooms or len(rooms) == 0:
+        room_list = data.get("data", [])
+
+        if not room_list or len(room_list) == 0:
             return "<p>😔 申し訳ございません。指定された条件に合う空室がございません。別の日程または条件をお試しください。</p>"
 
         # Build HTML for all rooms
         html_parts = [
-            f"<div style='margin: 20px 0;'><h3>✨ {len(rooms)}種類のお部屋がご利用可能です</h3></div>"
+            f"<div style='margin: 20px 0;'><h3>✨ {len(room_list)}種類のお部屋がご利用可能です</h3></div>"
         ]
 
-        for room in rooms:
+        for room in room_list:
             room_html = f"""
 <div style='border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; margin: 15px 0; background-color: #f9f9f9;'>
     <div style='display: flex; gap: 15px; flex-wrap: wrap;'>
