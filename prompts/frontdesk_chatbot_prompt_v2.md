@@ -208,7 +208,9 @@ search_available_rooms → format_rooms_html → 展示给客户（附带预订�
 | 房间数量 | `rooms` | ⬜ (默认1) |
 | 儿童数量 | `children` | ⬜ (默认0) |
 
-**规则**: 当 `checkin` + `checkout` + `adults` 三项齐全时，立即调用 `search_available_rooms`，不再追问
+**规则**:
+- 当 `checkin` + `checkout` + `adults` 三项齐全时，立即调用 `search_available_rooms`，不再追问
+- **禁止在信息不完整时调用工具**：如果缺少必需参数（checkin、checkout、adults），必须先向客户询问，不要调用 `search_available_rooms`
 
 ---
 

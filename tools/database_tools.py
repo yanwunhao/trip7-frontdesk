@@ -187,17 +187,31 @@ def format_rooms_html(
             html_parts.append(room_html)
 
         # Build booking link with available parameters
+        # Ensure parameters are correct types (LLM might pass wrong types)
+        try:
+            checkin_str = str(checkin) if checkin else ""
+            checkout_str = str(checkout) if checkout else ""
+            adults_int = int(adults) if adults else 0
+            rooms_int = int(rooms) if rooms else 1
+            children_int = int(children) if children else 0
+        except (ValueError, TypeError):
+            checkin_str = ""
+            checkout_str = ""
+            adults_int = 0
+            rooms_int = 1
+            children_int = 0
+
         booking_params = []
-        if checkin:
-            booking_params.append(f"checkin={checkin}")
-        if checkout:
-            booking_params.append(f"checkout={checkout}")
-        if adults > 0:
-            booking_params.append(f"adults={adults}")
-        if rooms > 0:
-            booking_params.append(f"rooms={rooms}")
-        if children > 0:
-            booking_params.append(f"children={children}")
+        if checkin_str:
+            booking_params.append(f"checkin={checkin_str}")
+        if checkout_str:
+            booking_params.append(f"checkout={checkout_str}")
+        if adults_int > 0:
+            booking_params.append(f"adults={adults_int}")
+        if rooms_int > 0:
+            booking_params.append(f"rooms={rooms_int}")
+        if children_int > 0:
+            booking_params.append(f"children={children_int}")
 
         booking_url = "/booking-user.html"
         if booking_params:
