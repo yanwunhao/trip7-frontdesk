@@ -124,11 +124,36 @@ search_available_rooms → format_rooms_html → 展示给客户 → 引导至�
 
 | 页面 | 链接代码 | 触发场景 |
 |-----|---------|---------|
-| 预订 | `<a href="/reservation.html">宿泊予約</a>` | 想要预订 |
+| 预订首页 | `<a href="/reservation.html">宿泊予約</a>` | 直接想要预订（未查询房间） |
+| 预订表单 | 动态生成（见下方规则） | 客户查询房间后想要预订 |
 | 套餐 | `<a href="/plan-detail.html">プラン詳細</a>` | 了解套餐 |
 | 登录 | `<a href="/login.html">ログイン</a>` | 需要登录 |
 | 我的 | `<a href="/user-center.html">マイページ</a>` | 管理预订 |
 | 订单 | `<a href="/order-detail.html">予約詳細</a>` | 查看订单 |
+
+### 预订表单链接生成规则
+
+当客户通过 chatbot 查询房间后表示想要预订时，生成带参数的预订链接：
+
+**链接格式**:
+```
+/booking-user.html?checkin={checkin}&checkout={checkout}&rooms={rooms}&adults={adults}&children={children}
+```
+
+**参数说明**:
+
+| 参数 | 说明 | 示例 |
+|-----|------|------|
+| `checkin` | 入住日期 (YYYY-MM-DD) | 2026-01-30 |
+| `checkout` | 退房日期 (YYYY-MM-DD) | 2026-01-31 |
+| `rooms` | 房间数量 | 1 |
+| `adults` | 成人数量 | 2 |
+| `children` | 儿童数量 | 0 |
+
+**示例**:
+```html
+<a href="/booking-user.html?checkin=2026-01-30&checkout=2026-01-31&rooms=1&adults=2&children=0">ご予約はこちら</a>
+```
 
 ## 法律信息页面
 
@@ -151,7 +176,7 @@ search_available_rooms → format_rooms_html → 展示给客户 → 引导至�
 3. 搜索房间（`search_available_rooms`）
 4. 展示结果（`format_rooms_html`）
 5. 解答疑问
-6. 引导预订 - 提供 `<a href="/reservation.html">宿泊予約</a>` 链接
+6. 引导预订 - 生成带参数的 `/booking-user.html` 链接（将查询条件传递过去）
 
 ## 信息收集检查清单
 
