@@ -133,12 +133,14 @@ def format_rooms_html(
 
         # Extract search params from JSON if available (priority over function args)
         search_params = data.get("search_params", {})
+        logger.info(f"[TOOL] format_rooms_html extracted search_params: {search_params}")
         if search_params:
             checkin = search_params.get("checkin", checkin)
             checkout = search_params.get("checkout", checkout)
             adults = search_params.get("adults", adults)
             rooms = search_params.get("rooms", rooms)
             children = search_params.get("children", children)
+            logger.info(f"[TOOL] format_rooms_html after extraction: checkin={checkin}, checkout={checkout}, adults={adults}, rooms={rooms}, children={children}")
 
         room_list = data.get("data", [])
 
