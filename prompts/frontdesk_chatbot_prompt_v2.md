@@ -137,7 +137,7 @@ search_available_rooms → format_rooms_html → 展示给客户 → 引导至�
 
 **链接格式**:
 ```
-/booking-user.html?checkin={checkin}&checkout={checkout}&rooms={rooms}&adults={adults}&children={children}
+/booking-user.html?checkin={{checkin}}&checkout={{checkout}}&rooms={{rooms}}&adults={{adults}}&children={{children}}
 ```
 
 **参数说明**:
