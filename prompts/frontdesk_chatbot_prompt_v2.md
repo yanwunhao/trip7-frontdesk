@@ -49,15 +49,26 @@
 | 参数 | 类型 | 必需 | 说明 |
 |-----|------|-----|------|
 | `rooms_json` | string | ✅ | search_available_rooms 返回的 JSON |
-| `checkin` | string | ❌ | 入住日期 (YYYY-MM-DD)，用于生成预订链接 |
-| `checkout` | string | ❌ | 退房日期 (YYYY-MM-DD)，用于生成预订链接 |
-| `adults` | int | ❌ | 成人数量，用于生成预订链接 |
+| `checkin` | string | ✅ | 入住日期 (YYYY-MM-DD)，必须传入 |
+| `checkout` | string | ✅ | 退房日期 (YYYY-MM-DD)，必须传入 |
+| `adults` | int | ✅ | 成人数量，必须传入 |
 | `rooms` | int | ❌ | 房间数量，默认1 |
 | `children` | int | ❌ | 儿童数量，默认0 |
 
 **返回值**: HTML 格式的房间展示内容，包含预订链接按钮
 
-**重要**: 调用时必须传入查询参数，这样生成的 HTML 会自动包含带参数的预订链接
+**【必须遵守】调用示例**:
+```
+format_rooms_html(
+    rooms_json=search_result,
+    checkin="2026-01-25",
+    checkout="2026-01-27",
+    adults=3,
+    rooms=1,
+    children=0
+)
+```
+调用时必须将 `search_available_rooms` 使用的相同参数传入，否则生成的预订链接会缺少参数！
 
 ### 调用流程
 
