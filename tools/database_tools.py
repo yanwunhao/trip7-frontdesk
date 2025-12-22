@@ -87,16 +87,28 @@ def search_available_rooms(
 
 
 @tool
-def format_rooms_html(rooms_json) -> str:
+def format_rooms_html(
+    rooms_json,
+    checkin: str = "",
+    checkout: str = "",
+    adults: int = 0,
+    rooms: int = 1,
+    children: int = 0,
+) -> str:
     """
     Format room search results into HTML for display to the user.
     Use this tool AFTER search_available_rooms to present the results in a user-friendly format.
 
     Args:
         rooms_json: JSON string or dict from search_available_rooms containing room data
+        checkin: Check-in date (YYYY-MM-DD) for generating booking link
+        checkout: Check-out date (YYYY-MM-DD) for generating booking link
+        adults: Number of adults for generating booking link
+        rooms: Number of rooms for generating booking link (default 1)
+        children: Number of children for generating booking link (default 0)
 
     Returns:
-        HTML formatted string with room information, images, and details
+        HTML formatted string with room information, images, details and booking link
     """
     logger.info(f"[TOOL] format_rooms_html called")
     try:
@@ -174,13 +186,33 @@ def format_rooms_html(rooms_json) -> str:
 """
             html_parts.append(room_html)
 
-        # Add a footer note
+        # Build booking link with available parameters
+        booking_params = []
+        if checkin:
+            booking_params.append(f"checkin={checkin}")
+        if checkout:
+            booking_params.append(f"checkout={checkout}")
+        if adults > 0:
+            booking_params.append(f"adults={adults}")
+        if rooms > 0:
+            booking_params.append(f"rooms={rooms}")
+        if children > 0:
+            booking_params.append(f"children={children}")
+
+        booking_url = "/booking-user.html"
+        if booking_params:
+            booking_url += "?" + "&".join(booking_params)
+
+        # Add a footer with booking link
         html_parts.append(
-            """
-<div style='margin-top: 20px; padding: 15px; background-color: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;'>
-    <p style='margin: 0; font-size: 14px; color: #856404;'>
-        💡 ご予約をご希望の場合は、お部屋タイプをお知らせください。お客様のご要望に応じてご案内させていただきます。
+            f"""
+<div style='margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;'>
+    <p style='margin: 0 0 10px 0; font-size: 14px; color: #2e7d32;'>
+        💡 ご予約をご希望の場合は、下記のリンクからお手続きください。
     </p>
+    <a href='{booking_url}' style='display: inline-block; padding: 10px 20px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+        📝 ご予約はこちら
+    </a>
 </div>
 """
         )
