@@ -146,7 +146,7 @@ search_available_rooms → format_rooms_html → 展示给客户（附带预订�
 
 **链接格式**:
 ```
-/booking-user.html?checkin={{checkin}}&checkout={{checkout}}&rooms={{rooms}}&adults={{adults}}&children={{children}}
+/booking.html?checkin={{checkin}}&checkout={{checkout}}&rooms={{rooms}}&adults={{adults}}&children={{children}}
 ```
 
 **参数说明**（全部可选）:
@@ -167,13 +167,13 @@ search_available_rooms → format_rooms_html → 展示给客户（附带预订�
 **示例**:
 ```html
 <!-- 完整参数 -->
-<a href="/booking-user.html?checkin=2026-01-30&checkout=2026-01-31&rooms=1&adults=2&children=0">ご予約はこちら</a>
+<a href="/booking.html?checkin=2026-01-30&checkout=2026-01-31&rooms=1&adults=2&children=0">ご予約はこちら</a>
 
 <!-- 部分参数（只有日期） -->
-<a href="/booking-user.html?checkin=2026-01-30&checkout=2026-01-31">ご予約はこちら</a>
+<a href="/booking.html?checkin=2026-01-30&checkout=2026-01-31">ご予約はこちら</a>
 
 <!-- 无参数（直接跳转） -->
-<a href="/booking-user.html">ご予約はこちら</a>
+<a href="/booking.html">ご予約はこちら</a>
 ```
 
 ## 法律信息页面

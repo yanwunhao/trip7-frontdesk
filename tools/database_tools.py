@@ -213,7 +213,7 @@ def format_rooms_html(
         if children_int > 0:
             booking_params.append(f"children={children_int}")
 
-        booking_url = "/booking-user.html"
+        booking_url = "/booking.html"
         if booking_params:
             booking_url += "?" + "&".join(booking_params)
 
