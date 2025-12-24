@@ -177,56 +177,19 @@ def format_rooms_html(
                 room_booking_url += "?" + "&".join(room_booking_params)
 
             room_html = f"""
-<div style='border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; margin: 15px 0; background-color: #f9f9f9;'>
-    <div style='display: flex; gap: 15px; flex-wrap: wrap;'>
-        <div style='flex: 0 0 200px;'>
-            <img src='{room.get("image_path", "")}'
-                 alt='{room.get("room_type_name", "")}'
-                 style='width: 100%; border-radius: 8px; object-fit: cover;'/>
-        </div>
-        <div style='flex: 1; min-width: 250px;'>
-            <h4 style='margin: 0 0 10px 0; color: #2c3e50;'>{room.get("room_type_name", "")}</h4>
-            <p style='margin: 5px 0; color: #7f8c8d; font-size: 14px;'>{room.get("room_type_name_en", "")}</p>
-            <p style='margin: 8px 0; font-size: 14px;'>{room.get("description", "")}</p>
-            <div style='margin-top: 10px;'>
-                <span style='display: inline-block; margin: 5px 10px 5px 0; padding: 5px 10px; background-color: #e8f4f8; border-radius: 5px; font-size: 13px;'>
-                    📐 {room.get("room_size", "")}
-                </span>
-                <span style='display: inline-block; margin: 5px 10px 5px 0; padding: 5px 10px; background-color: #e8f4f8; border-radius: 5px; font-size: 13px;'>
-                    🛏️ {room.get("bed_type", "")}
-                </span>
-                <span style='display: inline-block; margin: 5px 10px 5px 0; padding: 5px 10px; background-color: #e8f4f8; border-radius: 5px; font-size: 13px;'>
-                    👥 最大{room.get("max_occupancy", "")}名
-                </span>
-                <span style='display: inline-block; margin: 5px 10px 5px 0; padding: 5px 10px; background-color: #e8f4f8; border-radius: 5px; font-size: 13px;'>
-                    🏞️ {room.get("view_type", "")}
-                </span>
-            </div>
-            <div style='margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;'>
-                <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;'>
-                    <div>
-                        <p style='margin: 5px 0; font-size: 13px; color: #7f8c8d;'>
-                            {room.get("nights", 1)}泊 (税込)
-                        </p>
-                        <p style='margin: 5px 0; font-size: 24px; font-weight: bold; color: #e74c3c;'>
-                            ¥{room.get("total_price", 0):,}
-                        </p>
-                        <p style='margin: 5px 0; font-size: 12px; color: #95a5a6;'>
-                            1泊あたり ¥{room.get("price_with_tax", 0):,}
-                        </p>
-                    </div>
-                    <div style='text-align: right;'>
-                        <p style='margin: 5px 0; font-size: 14px; color: #27ae60; font-weight: bold;'>
-                            残り{room.get("available_rooms", 0)}室
-                        </p>
-                        <a href='{room_booking_url}' style='display: inline-block; margin-top: 8px; padding: 10px 20px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;'>
-                            📝 予約する
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div style='border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 10px 0; background: #f9f9f9;'>
+<img src='{room.get("image_path", "")}' alt='{room.get("room_type_name", "")}' style='width: 100%; max-width: 280px; border-radius: 6px; margin-bottom: 10px;'/>
+<div style='font-weight: bold; color: #2c3e50; margin-bottom: 5px;'>{room.get("room_type_name", "")}</div>
+<div style='font-size: 12px; color: #7f8c8d; margin-bottom: 8px;'>{room.get("room_type_name_en", "")}</div>
+<div style='font-size: 13px; margin-bottom: 8px;'>{room.get("description", "")}</div>
+<div style='font-size: 12px; color: #555; margin-bottom: 8px;'>📐 {room.get("room_size", "")} | 🛏️ {room.get("bed_type", "")} | 👥 最大{room.get("max_occupancy", "")}名</div>
+<div style='border-top: 1px solid #ddd; padding-top: 10px; margin-top: 10px;'>
+<div style='font-size: 12px; color: #7f8c8d;'>{room.get("nights", 1)}泊 (税込)</div>
+<div style='font-size: 20px; font-weight: bold; color: #e74c3c;'>¥{room.get("total_price", 0):,}</div>
+<div style='font-size: 11px; color: #95a5a6;'>1泊あたり ¥{room.get("price_with_tax", 0):,}</div>
+<div style='font-size: 13px; color: #27ae60; font-weight: bold; margin: 8px 0;'>残り{room.get("available_rooms", 0)}室</div>
+<a href='{room_booking_url}' style='display: inline-block; padding: 8px 16px; background: #4caf50; color: white; text-decoration: none; border-radius: 4px; font-size: 13px;'>📝 予約する</a>
+</div>
 </div>
 """
             html_parts.append(room_html)
