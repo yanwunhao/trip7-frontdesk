@@ -152,7 +152,30 @@ def format_rooms_html(
             f"<div style='margin: 20px 0;'><h3>✨ {len(room_list)}種類のお部屋がご利用可能です</h3></div>"
         ]
 
+        # Build base booking URL params
+        base_booking_params = []
+        if checkin:
+            base_booking_params.append(f"checkin={checkin}")
+        if checkout:
+            base_booking_params.append(f"checkout={checkout}")
+        if adults:
+            base_booking_params.append(f"adults={adults}")
+        if rooms:
+            base_booking_params.append(f"rooms={rooms}")
+        if children:
+            base_booking_params.append(f"children={children}")
+
         for room in room_list:
+            # Build booking URL for this room type
+            room_type_code = room.get("room_type_code", "")
+            room_booking_params = base_booking_params.copy()
+            if room_type_code:
+                room_booking_params.append(f"code={room_type_code}")
+
+            room_booking_url = "/booking.html"
+            if room_booking_params:
+                room_booking_url += "?" + "&".join(room_booking_params)
+
             room_html = f"""
 <div style='border: 2px solid #e0e0e0; border-radius: 10px; padding: 15px; margin: 15px 0; background-color: #f9f9f9;'>
     <div style='display: flex; gap: 15px; flex-wrap: wrap;'>
@@ -180,7 +203,7 @@ def format_rooms_html(
                 </span>
             </div>
             <div style='margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;'>
-                <div style='display: flex; justify-content: space-between; align-items: center;'>
+                <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;'>
                     <div>
                         <p style='margin: 5px 0; font-size: 13px; color: #7f8c8d;'>
                             {room.get("nights", 1)}泊 (税込)
@@ -196,6 +219,9 @@ def format_rooms_html(
                         <p style='margin: 5px 0; font-size: 14px; color: #27ae60; font-weight: bold;'>
                             残り{room.get("available_rooms", 0)}室
                         </p>
+                        <a href='{room_booking_url}' style='display: inline-block; margin-top: 8px; padding: 10px 20px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px;'>
+                            📝 予約する
+                        </a>
                     </div>
                 </div>
             </div>
@@ -204,51 +230,6 @@ def format_rooms_html(
 </div>
 """
             html_parts.append(room_html)
-
-        # Build booking link with available parameters
-        # Ensure parameters are correct types (LLM might pass wrong types)
-        try:
-            checkin_str = str(checkin) if checkin else ""
-            checkout_str = str(checkout) if checkout else ""
-            adults_int = int(adults) if adults else 0
-            rooms_int = int(rooms) if rooms else 1
-            children_int = int(children) if children else 0
-        except (ValueError, TypeError):
-            checkin_str = ""
-            checkout_str = ""
-            adults_int = 0
-            rooms_int = 1
-            children_int = 0
-
-        booking_params = []
-        if checkin_str:
-            booking_params.append(f"checkin={checkin_str}")
-        if checkout_str:
-            booking_params.append(f"checkout={checkout_str}")
-        if adults_int > 0:
-            booking_params.append(f"adults={adults_int}")
-        if rooms_int > 0:
-            booking_params.append(f"rooms={rooms_int}")
-        if children_int > 0:
-            booking_params.append(f"children={children_int}")
-
-        booking_url = "/booking.html"
-        if booking_params:
-            booking_url += "?" + "&".join(booking_params)
-
-        # Add a footer with booking link
-        html_parts.append(
-            f"""
-<div style='margin-top: 20px; padding: 15px; background-color: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;'>
-    <p style='margin: 0 0 10px 0; font-size: 14px; color: #2e7d32;'>
-        💡 ご予約をご希望の場合は、下記のリンクからお手続きください。
-    </p>
-    <a href='{booking_url}' style='display: inline-block; padding: 10px 20px; background-color: #4caf50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;'>
-        📝 ご予約はこちら
-    </a>
-</div>
-"""
-        )
 
         return "".join(html_parts)
 
